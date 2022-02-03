@@ -281,7 +281,7 @@ function init () {
                         color: '#fff'
                     }),
                     fill: new ol.style.Fill({
-                        color: '#7a6b60b3'
+                        color: '#00497B88'
                     }),
                 }),
                 text: new ol.style.Text({
