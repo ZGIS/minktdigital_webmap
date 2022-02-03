@@ -36,10 +36,61 @@
 			</div>
 			<button id="home"></button>
 
+			<!--- Search for Keyword Toolbox-->
+			<div class="hideTools">
+				<button id="tools"></button>
+			</div>
+			<div id="toolbox" style="display: none">
+				<h2>Keyword Suche</h2>
+				<div class ="row">
+					<p> Suche nach Stories mit bestimmten<br>Wörtern:</p>
+				</div>
+				<div class="row">
+					<form id="keyword">
+						<input type="text" id="suchwort" name="suchwort" placeholder="Gib hier etwas ein"><br>  
+						<input type="submit" value="Suchen">
+					</form>
+				</div>
+				<!---
+				<hr>
+				<h2>Zeitspanne</h2>
+				<div class ="row">
+					<p> Suche nach Stories in einem bestimmten<br>Zeitraum:</p>
+				</div>
+				<div class="row">
+					<form id="dates">
+						<label for="startdate" style="font-family: 'Lato', sans-serif; font-size: small;">Von:</label>
+						<input type="date" id="startdate" name="startdate" placeholder="Gib hier etwas ein"><br>  
+						<label for="enddate" style="font-family: 'Lato', sans-serif; font-size: small;">Bis:</label>
+						<input type="date" id="enddate" name="enddate" placeholder="Gib hier etwas ein"><br>  						
+						<input type="submit" value="Suche">
+					</form>
+				</div>
+			-->
+				<hr>
+				<div class="row">
+					<form id="clear">
+						<input type="submit" value="Suche zurücksetzen">
+					</form>
+				</div>
+			</div>
+
+			
+			<!--- Results List
+			<table id="results" class="results" style="display: none">
+				<tr>
+					<th>Story</th>
+					<th>Beschreibung</th>
+				</tr>
+			</div>
+-->
+
+
+
 			<!-- legend -->
 			<button id="legend-button"></button>
 			<div id="legend" style="display: none">
-				<h3>Legende</h3>
+				<h2>Legende</h2>
 				<div class ="row">
 					<div class="column1">
 						<p> Lebensort</p>
@@ -93,8 +144,12 @@
 			<span class='popup-text' id='feature-category'></span> 
 			<span class='popup-image' id='feature-image' ></span> 
 		</div>
+	    
+	    <!-- image gallery -->
 		<div class="wrapper">
+			<!-- previous button -->
 			<a class="prev" onclick="init.changeIndex(-1);"> &#10094 </a>
+			<!-- four images displayed -->
 			<div class="media" id= "media1" style = "box-shadow: 0px 0px 7px rgba(83, 83, 83, 0.644);">
 				<div class="layers">
 					<p id='image1-text' text-align= 'center'></p>
@@ -119,7 +174,7 @@
 			  	</div>
 				<span class='gallery' id='gallery-image4'></span> 
 			</div>
-			<!-- Next and previous buttons -->
+			<!-- Next button -->
 		<a class="next" onclick= "init.changeIndex(1);" > &#10095 </a>
 		</div>
         <div id="footer"></div>
