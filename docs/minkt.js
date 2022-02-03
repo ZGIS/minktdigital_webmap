@@ -1,10 +1,20 @@
 function init () {
    
-    
+    /* 
+    ESRI TOKEN FOR IMAGE URL
+    In the past, we have had to update the token a few times. If it changes again (= pictures don't load), go to the survey in the ArcGIS Online Contents 
+    It's called "Teile eine Teile eine neue MINKT STORY" and it's a form > Manage in Survey123 Website >  Analyze > Scroll to bottom and open one of the images >
+    get the image url. In the URL you can see the new token. Insert the token below:
+    */
+   
+    // var token = "?token=Wmh-VKC7cu7S0izWfij9hBXqRgrTejQ7f72a569ZpjOHeE0776nfNpVY5vP5qax0fZh6YqsNzfMzHxNF9tqLpv1omWIQsKilwv73rEEATjMWyCUgbwlhZoYE_M-qI0geKLLnN3G518pPMPf2BzCAKGk1i1otQkxL5A_uqxBzgYEdE9lfahgJpxq7EcIzsbZm85WQvz5rFSSY-ZN_6JQJDZ4Kg0HBIIZNhLoM3LYckjTLKbXXSqs6MhFs-MrhEyPM' ";
+   
+   
     /*
     BASE LAYERS
     */
 
+    // Bing Styles and Key
     var styles = ['Road', 'Aerial','AerialWithLabels'];
     var bingKey = 'Atoz1wDioRmjCFJbh0EYKVbNhY1FpWn2hyBGodCxBwsbWmxEP9Il16k9qcBBLXWk';
 
@@ -25,7 +35,7 @@ function init () {
                 }),
             })
         );
-    }//for
+    }
 
     //OSM layer
     var osm = new ol.layer.Tile({
@@ -40,6 +50,7 @@ function init () {
 
     /*
     WFS INTEGRATION
+    The images for the features are stored in the static folder on GitHub
     */
 
     // Icon Styling
@@ -88,6 +99,11 @@ function init () {
             src: 'static/lebensort.png'
         })
     });
+    var invisible = new ol.style.Style({ // to be used for flashing symbols
+        stroke: new ol.style.Stroke({
+        width: 0, color: [255, 0, 0, 1]
+        })
+});
 
     // WFS get features request
     var request = 'https://dservices.arcgis.com/Sf0q24s0oDKgX14j/arcgis/services/MinktStories/WFSServer?service=wfs&' +
@@ -103,7 +119,7 @@ function init () {
 
     // Parse as JSON
     var requestJSON = JSON.parse(httpGet(request));
-    // console.log(requestJSON);
+    console.log(requestJSON);
     
     var allFeatures = new ol.source.Vector();
     var mobility = new ol.source.Vector();
@@ -111,10 +127,16 @@ function init () {
     var lebensort = new ol.source.Vector();
     var sonstige = new ol.source.Vector();
 
+    var flashing = new ol.source.Vector();
+    var flashy = new ol.layer.Vector({
+        source: flashing,
+    });
+
+
     // Create a layer with all features but individual styling
     for (var y in requestJSON.features) {
         var feature = requestJSON.features[y];
-        var position = ol.proj.transform([feature.geometry.coordinates[0], feature.geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+        var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
         var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
         });
@@ -136,11 +158,11 @@ function init () {
     // Distibute features in layers based on property "Zuordnung"
     for (var x in requestJSON.features) {
         var feature = requestJSON.features[x];
-        var position = ol.proj.transform([feature.geometry.coordinates[0], feature.geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
-        //console.log(feature.geometry.coordinates);
+        var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
+
         /* single mobility layer */
         if (feature.properties.Zuordnung == "Positiver_Mobilitätsmoment" || feature.properties.Zuordnung == "Negativer_Mobilitätsmoment") {
-            var position = ol.proj.transform([feature.geometry.coordinates[0], feature.geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+            var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
             });
@@ -153,7 +175,7 @@ function init () {
             point.setProperties(feature.properties);
         }
         if (feature.properties.Zuordnung == "Positiver_Mobilitätsmoment" || feature.properties.Zuordnung == "Negativer_Mobilitätsmoment") {
-            var position = ol.proj.transform([feature.geometry.coordinates[0], feature.geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+            var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
             });
@@ -165,7 +187,7 @@ function init () {
             mobility.addFeature(point);
             point.setProperties(feature.properties);
         }else if (feature.properties.Zuordnung == "Positiver_Mobilitätsmoment" || feature.properties.Zuordnung == "Negativer_Mobilitätsmoment") {
-            var position = ol.proj.transform([feature.geometry.coordinates[0], feature.geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+            var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
             });
@@ -178,7 +200,7 @@ function init () {
             point.setProperties(feature.properties);
         }
          else if (feature.properties.Zuordnung == "Lebensort") {
-            var position = ol.proj.transform([feature.geometry.coordinates[0], feature.geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+            var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
             }); //Feature
@@ -186,7 +208,7 @@ function init () {
             lebensort.addFeature(point);
             point.setProperties(feature.properties);
         } else if (feature.properties.Zuordnung == "Heilpflanze") {
-            var position = ol.proj.transform([feature.geometry.coordinates[0], feature.geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+            var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
             });
@@ -194,11 +216,10 @@ function init () {
             plants.addFeature(point);
             point.setProperties(feature.properties);
         } else if (feature.properties.Zuordnung == "other") {
-            var position = ol.proj.transform([feature.geometry.coordinates[0], feature.geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+            var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
             });
-            console.log(feature.properties.Zuordnung);
             point.setStyle(oStyle);
             sonstige.addFeature(point);
             point.setProperties(feature.properties);
@@ -260,7 +281,7 @@ function init () {
                         color: '#fff'
                     }),
                     fill: new ol.style.Fill({
-                        color: '#1D6889b3'
+                        color: '#7a6b60b3'
                     }),
                 }),
                 text: new ol.style.Text({
@@ -294,7 +315,6 @@ function init () {
     // Once location is found ("change") draw marker, set geolocation to false, zoom to location
     geolocation.on('change', function(){			
         var currentPosition = ol.proj.transform(geolocation.getPosition(), 'EPSG:4326', 'EPSG:3857');			
-        console.log(currentPosition);
         drawMarkerCurrentPosition(currentPosition);
         geolocation.setTracking(false);
         map.getView().setCenter(currentPosition);
@@ -336,7 +356,7 @@ function init () {
     });
 
     overlays = new ol.layer.Group({
-        title: 'MINKT DIGITAL Stories',
+        title: 'MINKT Stories',
         fold: "open",
         layers: [otherLayer, lebensortLayer, mobilityLayer, plantsLayer]
     });
@@ -347,6 +367,14 @@ function init () {
         layers: [markerLayer]
     });
 
+  /*
+    flashes = new ol.layer.Group({
+        title: 'flashes',
+        fold: "close",
+        type: 'none',
+        layers: [flashy]
+    });
+*/
 
     /*
     LAYER SWITCHER
@@ -362,30 +390,36 @@ function init () {
     CREATE BASIC MAP
     */
 
-   // Create a variable homePosition 
-   var homePosition = ol.proj.transform ([13.04717, 47.810010], 'EPSG:4326', 'EPSG:3857');
+   // Create a variable lungauPosition. This position will be the "starting" view when the page is loaded.
+   var lungauPosition = ol.proj.transform ([13.80937, 47.12704], 'EPSG:4326', 'EPSG:3857');
 
     var map = new ol.Map({
         layers: [
             baseLayers,
             overlays,
             clusterLayer,
-            positioning
+            positioning,
+            flashy
         ],
         controls: ol.control.defaults({
+            rotate: false,
             attributionOptions: ({
                 collapsible: true
             })
         }).extend([
             layerSwitcher,
+            new ol.control.FullScreen(),
             new ol.control.ScaleLine()
         ]),
         target: 'map',
         view: new ol.View({
-            center: homePosition,
+            center: lungauPosition,
             zoom: 10
         })
     });
+
+
+   //  map.addLayer(flashy);
 
     // Geolocation button in map       
     function el(id) {
@@ -404,8 +438,8 @@ function init () {
     
     const zoomHome = document.getElementById('home');
     zoomHome.addEventListener('click', function() {
-        map.getView().setCenter(homePosition);
-        map.getView().setZoom(11);
+        map.getView().setCenter(lungauPosition);
+        map.getView().setZoom(13);
     }, false);  
 
     /*
@@ -417,15 +451,167 @@ function init () {
     var counter = 0;
     legend.addEventListener('click', function() {
         counter++;
-        console.log(counter);
         if (counter % 2 != 0) {
             document.querySelector('#legend').setAttribute("style", "display: flexbox;");
-            console.log("Set to flexbox");
         } else  {
             document.querySelector('#legend').setAttribute("style", "display: none");
-            console.log("Set to none");
         }
     });
+
+      /*
+    Tools Button
+    */
+
+    const tools = document.getElementById("tools");
+    var counter = 0;
+    tools.addEventListener('click', function() {
+        counter++;
+        if (counter % 2 != 0) {
+            document.querySelector('#toolbox').setAttribute("style", "display: flexbox;");
+        } else  {
+            document.querySelector('#toolbox').setAttribute("style", "display: none");
+        }
+    });
+    
+
+    /*
+    TOOLBOX 
+    */
+
+
+    // KEYWORD SEARCH
+    // connect to keyword search form
+    const formKeyword = document.getElementById('keyword');
+    var searchword;
+    // prevent page from reloading 
+    function handleForm(event) { event.preventDefault(); } 
+    formKeyword.addEventListener('submit', handleForm);
+
+    results = [];
+
+
+    // get value entered by user
+    formKeyword.addEventListener('submit', (event) => {
+        searchword = document.getElementById("suchwort").value.toLowerCase();
+        console.log(searchword)
+        if (searchword == "")
+        {
+        alert("Gib bitte etwas in der Suchbox ein.");
+        return false;
+        }
+        else{
+            for (var x in requestJSON.features) {
+                var feature = requestJSON.features[x];
+                
+                // format everything to lowercase and check if Beschreibung or Title contain the searchword
+                if (feature.properties.Beschreibung.toLowerCase().includes(searchword) || feature.properties.Name_deiner_Story.toLowerCase().includes(searchword)) {
+                    console.log(feature.properties.Beschreibung);
+                    results.push((feature.properties.Name_deiner_Story, feature.properties.Beschreibung));
+                    
+                    var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
+                    
+                    var point = new ol.Feature({
+                    geometry: new ol.geom.Point(position)
+                    });
+                    point.setStyle(invisible);
+                    flashing.addFeature(point)
+                }
+            }
+        }
+
+    })
+    // Distibute features in layers based on property "Zuordnung"
+    
+
+
+    // FLASH ANIMATION
+    var duration = 3000;
+    function flash(feature) {
+    var start = new Date().getTime();
+    var listenerKey;
+    
+    function animate(event) {
+        
+        var vectorContext = event.vectorContext;
+        var frameState = event.frameState;
+        var flashGeom = feature.getGeometry().clone();
+        var elapsed = frameState.time - start;
+        var elapsedRatio = elapsed / duration;
+        // radius will be 5 at start and 30 at end.
+        var radius = ol.easing.easeOut(elapsedRatio) * 25 + 5;
+        var opacity = ol.easing.easeOut(1 - elapsedRatio);
+
+        var style = new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: radius,
+            snapToPixel: false,
+            stroke: new ol.style.Stroke({
+            color: 'rgba(255, 0, 0, ' + opacity + ')',
+            width: 0.25 + opacity
+            })
+        })
+        });
+
+        vectorContext.setStyle(style);
+        vectorContext.drawGeometry(flashGeom);
+        if (elapsed > duration) {
+          // elapsed == 0;
+          ol.Observable.unByKey(listenerKey);
+        return;
+        }
+        // tell OpenLayers to continue postcompose animation
+        map.render();
+    }
+    listenerKey = map.on('postcompose', animate);
+    }
+
+    flashing.on('addfeature', function(e) {
+        flash(e.feature);
+    });
+
+/*
+    // TIME SEARCH
+    // connect to keyword search form
+    const formDates = document.getElementById('dates');
+    // prevent page from reloading 
+    function handleForm(event) { event.preventDefault(); } 
+    formDates.addEventListener('submit', handleForm);
+
+    // get value entered by user
+    formDates.addEventListener('submit', (event) => {
+        var start = document.getElementById("startdate").value;
+        var end = document.getElementById("enddate").value;
+        console.log(start, end);
+
+        // Distibute features in layers based on property "Zuordnung"
+        for (var x in requestJSON.features) {
+            var feature = requestJSON.features[x];
+            var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
+
+            // single mobility layer
+            if (feature.properties.CreationDate <= start && feature.properties.CreationDate >= end) {
+                // var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
+                // var point = new ol.Feature({
+                // geometry: new ol.geom.Point(position)
+                // });
+                console.log(feature.properties.Name_deiner_Story);
+        }}})
+*/
+    
+    // CLEAR SEARCH
+    // connect to keyword search form
+    const formClear = document.getElementById('clear');
+    // prevent page from reloading 
+    function handleForm(event) { event.preventDefault(); } 
+    formClear.addEventListener('submit', handleForm);
+
+    // when submitted, clear all features from flashing layer
+    formClear.addEventListener('submit', (event) => {
+        flashing.clear();
+        results = [];
+        console.log("form cleared");
+    })
+
 
 
     /*
@@ -502,7 +688,6 @@ function init () {
         map.forEachFeatureAtPixel(e.pixel, function(feature, layer){
             if (layer === allLayer || layer === plantsLayer || layer === otherLayer || layer === lebensortLayer || layer === mobilityLayer) {
                 let hoverFeature = feature.get('Zuordnung')
-                console.log(hoverFeature);
                 
                 if (hoverFeature == "Heilpflanze") {
                     selected.setStyle(plantStyle1)
@@ -588,14 +773,16 @@ function init () {
                 let clickedFeatureCategory = feature.get('Zuordnung');
                 let clickedFeatureID = feature.get('ObjectID');
                 overlayLayer.setPosition(clickedCoordinate);
-                console.log(clickedFeatureName, clickedFeatureContent, clickedFeatureCategory);
                 overlayFeatureName.innerHTML = "<h3>" + clickedFeatureName + "</h3>";
                 overlayFeatureContent.innerHTML = "<p>" + clickedFeatureContent + "</p>";
                 overlayFeatureCategory.innerHTML = "<p><i>Kategorie: "+ clickedFeatureCategory + "</i></p>";
                 // Create image URL dynamically with the ObjectID 
+                /* overlayFeatureImage.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
+                clickedFeatureID + "/attachments/" + clickedFeatureID + token +
+                " height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);'>"; */
                 overlayFeatureImage.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
                 clickedFeatureID + "/attachments/" + clickedFeatureID +
-                " height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);'>";
+                "' height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);'>";
             }
         }) 
     });
@@ -625,14 +812,16 @@ function init () {
                     let clickedFeatureCategory = feature.get('Zuordnung');
                     let clickedFeatureID = feature.get('ObjectID');
                     overlayLayer1.setPosition(clickedCoordinate);
-                    console.log(clickedFeatureName, clickedFeatureContent, clickedFeatureCategory);
                     overlayFeatureName1.innerHTML = "<h3>" + clickedFeatureName + "</h3>";
                     overlayFeatureContent1.innerHTML = "<p>" + clickedFeatureContent + "</p>";
                     overlayFeatureCategory1.innerHTML = "<p><i>Kategorie: "+ clickedFeatureCategory + "</i></p>";
                    // Create image URL dynamically with the ObjectID 
-                    overlayFeatureImage1.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
+                    /* overlayFeatureImage1.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
+                    clickedFeatureID + "/attachments/" + clickedFeatureID + token +
+                    " height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);'>"; */
+                    overlayFeatureImage.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
                     clickedFeatureID + "/attachments/" + clickedFeatureID +
-                    " height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);'>";
+                    "' height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);'>";                   
                 }
            })
         });
@@ -642,19 +831,19 @@ function init () {
     IMAGE GALLERY
     */
 
-    // Images in Gallery
+    // Images in Gallery - link to the elements in the index.html file
     const galleryimage1 = document.getElementById('gallery-image1');
     const galleryimage2 = document.getElementById('gallery-image2');
     const galleryimage3 = document.getElementById('gallery-image3');
     const galleryimage4 = document.getElementById('gallery-image4');
 
-    // Hover text in Gallery
+    // Hover text in Gallery - link to the elements in the index.html file
     const gallerytext1 = document.getElementById('image1-text');
     const gallerytext2 = document.getElementById('image2-text');
     const gallerytext3 = document.getElementById('image3-text');
     const gallerytext4 = document.getElementById('image4-text');
 
-    // Get ObjectID for image URL
+    // Get ObjectID for each feature. The object ID is important for the image URL. 
     var featuresID = [];
     for (var u in requestJSON.features) {
         featuresID[u] = requestJSON.features[u].properties.ObjectID;
@@ -666,25 +855,29 @@ function init () {
         featuresText[v] = requestJSON.features[v].properties.Name_deiner_Story;
     }; 
     
-    // Variable to set imageIndex (determines which images are shown)
-    // Initial value defaults to the middle of the array, so users can click prev. and next
+    // Here we caluclate the imageIndex to determine which images are shown in the four display boxes
+    // We have set the initial default imageIndex value to the middle of the array, so users can click on both the prev. and next buttons
     var length = requestJSON.features.length;
     // Apply Math.round to the initial index number - otherwise we might get a decimal number!
     var imageIndex = Math.round((length - (length / 2)));
 
-    // Fill Gallery with initial images uning URL frame and imageIndex
+    // Fill Gallery with initial images using URL frame and imageIndex and token
+ 
     galleryimage1.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
     featuresID[imageIndex] + "/attachments/" + featuresID[imageIndex] +
-    " width='300' >";
+    "' width='300' >";
+
     galleryimage2.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
     featuresID[imageIndex + 1] + "/attachments/" + featuresID[imageIndex + 1] +
-    " width='300' >";
+    "' width='300' >";
+ 
     galleryimage3.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
     featuresID[imageIndex + 2] + "/attachments/" + featuresID[imageIndex + 2] +
-    " width='300' >";
+    "' width='300' >";
+
     galleryimage4.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
     featuresID[imageIndex + 3] + "/attachments/" + featuresID[imageIndex + 3] +
-    " width='300' >";
+    "' width='300' >";
 
     // Fill Gallery with text corresponding to images 
     gallerytext1.innerHTML = "<p>" + featuresText[imageIndex] + "</p>";
@@ -707,16 +900,16 @@ function init () {
             // Fill Gallery with Images
             galleryimage1.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
             featuresID[imageIndex] + "/attachments/" + featuresID[imageIndex] +
-            " width='300'>";
+            "' width='300'>";
             galleryimage2.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
             featuresID[imageIndex + 1] + "/attachments/" + featuresID[imageIndex + 1] +
-            " width='300'>";
+            "' width='300'>";
             galleryimage3.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
             featuresID[imageIndex + 2] + "/attachments/" + featuresID[imageIndex + 2] +
-            " width='300'>";
+            "' width='300'>";
             galleryimage4.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
             featuresID[imageIndex + 3] + "/attachments/" + featuresID[imageIndex + 3] +
-            " width='300'>";
+            "' width='300'>";
 
             // Fill Gallery with Text
             gallerytext1.innerHTML = "<p>" + featuresText[imageIndex] + "</p>";
@@ -729,28 +922,29 @@ function init () {
         return imageIndex;
     }
 
-    // Add Event listener on media blocks for zoom and center function in map
-    const media1 = document.getElementById('media1');
-
+    // Add Event listener on image blocks: if clicked, then zoom and center on that feature in the map
+    
+   const media1 = document.getElementById('media1');
     media1.addEventListener('click', function () {
-         var zoomPosition = ol.proj.transform([requestJSON.features[imageIndex].geometry.coordinates[0], requestJSON.features[imageIndex].geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+         // get position of feature and zoom to it
+         var zoomPosition = ([requestJSON.features[imageIndex].geometry.coordinates[0], requestJSON.features[imageIndex].geometry.coordinates[1]]);
          map.getView().setCenter(zoomPosition);
          map.getView().setZoom(16);
-          // Pop-Up
+          // Create Pop-Up for that feature as well
           overlayLayer1.setPosition(zoomPosition);
-          console.log(zoomPosition);
+
           overlayFeatureName1.innerHTML = "<h3>" + requestJSON.features[imageIndex].properties.Name_deiner_Story + "</h3>";
           overlayFeatureContent1.innerHTML = "<p>" + requestJSON.features[imageIndex].properties.Beschreibung + "</p>";
           overlayFeatureCategory1.innerHTML = "<p><i>Kategorie: "+ requestJSON.features[imageIndex].properties.Zuordnung + "</i></p>";
           // Create image URL dynamically with the ObjectID 
           overlayFeatureImage.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
           (imageIndex + 1) + "/attachments/" + (imageIndex + 1) +
-          " height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);'>";
+          "' height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);'>";
         })
 
     const media2 = document.getElementById('media2');
     media2.addEventListener('click', function () {
-         var zoomPosition = ol.proj.transform([requestJSON.features[imageIndex + 1].geometry.coordinates[0], requestJSON.features[imageIndex + 1].geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+         var zoomPosition = ([requestJSON.features[imageIndex + 1].geometry.coordinates[0], requestJSON.features[imageIndex + 1].geometry.coordinates[1]]);
          map.getView().setCenter(zoomPosition);
          map.getView().setZoom(16);
          // Pop-Up
@@ -761,12 +955,12 @@ function init () {
          // Create image URL dynamically with the ObjectID 
          overlayFeatureImage1.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
          (imageIndex + 2) + "/attachments/" + (imageIndex + 2) +
-         " height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);' >";
+         "' height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);' >";
         })
 
     const media3 = document.getElementById('media3');
     media3.addEventListener('click', function () {
-         var zoomPosition = ol.proj.transform([requestJSON.features[imageIndex + 2].geometry.coordinates[0], requestJSON.features[imageIndex + 2].geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');
+         var zoomPosition = ([requestJSON.features[imageIndex + 2].geometry.coordinates[0], requestJSON.features[imageIndex + 2].geometry.coordinates[1]]);
          map.getView().setCenter(zoomPosition);
          map.getView().setZoom(16);
          // Pop-Up
@@ -777,12 +971,12 @@ function init () {
         // Create image URL dynamically with the ObjectID 
         overlayFeatureImage1.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
         (imageIndex + 3) + "/attachments/" + (imageIndex + 3) +
-        " height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);' >";
+        "' height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);' >";
         })
 
     const media4 = document.getElementById('media4');
     media4.addEventListener('click', function () {
-        var zoomPosition = ol.proj.transform([requestJSON.features[imageIndex + 3].geometry.coordinates[0], requestJSON.features[imageIndex + 3].geometry.coordinates[1]], 'EPSG:4326', 'EPSG:3857');            
+        var zoomPosition = ([requestJSON.features[imageIndex + 3].geometry.coordinates[0], requestJSON.features[imageIndex + 3].geometry.coordinates[1]]);            
         map.getView().setCenter(zoomPosition);
         map.getView().setZoom(16);
         // Pop-Up
@@ -793,6 +987,7 @@ function init () {
         // Create image URL dynamically with the ObjectID 
         overlayFeatureImage1.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
         (imageIndex + 4) + "/attachments/" + (imageIndex + 4) +
-        " height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);' >";
+        "' height='200px' style = 'box-shadow: 0px 0px 5px rgba(83, 83, 83, 0.544);' >";
         })
+
 };
