@@ -1,15 +1,20 @@
 ![Capture3](https://user-images.githubusercontent.com/81073205/152939922-2dc2d2c5-208f-4eef-807f-2048b539101b.PNG)
 
-The MINKT DIGITAL web map is an open layers web application that integrates data collected in Survey123 as a WFS. The application includes pop-ups, geolocation, an interactive gallery, and layer switchers ([walkermatt-layerswitcher](https://github.com/walkermatt/ol-layerswitcher)).
+The MINKT DIGITAL web map hosted here is the central element of a map-based platform with which the ([iDEAS:lab](https://ideaslab.plus.ac.at/)) in Salzburg, Austria hosts workshops to **build digial skills with young citizen scientists**.
 
-**See the Web Map Result:** <br/>
+The web map is an open layers web application that integrates data collected in Survey123 as a WFS. The application includes pop-ups, geolocation, an interactive gallery, and layer switchers ([walkermatt-layerswitcher](https://github.com/walkermatt/ol-layerswitcher)). 
+
+
+**See the Live Web Map:** <br/>
 [https://zgis.github.io/minktdigital_webmap/](https://zgis.github.io/minktdigital_webmap/)
 
-**View the MINKT Stories Platform:** <br/>
+**View the MINKT DIGITAL Platform:** <br/>
 [https://minkt-digital.zgis.at/](https://minkt-digital.zgis.at/)
 
 
 <br/>
+
+## The Map
 
 The inital view of the web map upon opening it shows the clustered features:
 
