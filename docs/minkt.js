@@ -434,7 +434,7 @@ function init () {
 
 
   
-    / ===================================== Home Button =====================================
+    // ===================================== HOME BUTTON =====================================
    
     
     const zoomHome = document.getElementById('home');
@@ -443,9 +443,9 @@ function init () {
         map.getView().setZoom(13);
     }, false);  
 
-    /*
-    Legend Button
-    */
+    
+    // ===================================== LEGEND BUTTON =====================================
+    
 
     const legend = document.getElementById("legend-button");
     // const legend_content = document.getElementById("legend");
@@ -460,7 +460,7 @@ function init () {
     });
 
     
-    // ===================================== Tools Button =====================================
+    // ===================================== TOOLS BUTTON =====================================
     
 
     const tools = document.getElementById("tools");
@@ -479,7 +479,7 @@ function init () {
     // ===================================== TOOLBOX FOR KEYWORD SEARCH =====================================
   
    
-    // KEYWORD SEARCH
+    // --------------- KEYWORD SEARCH ---------------
     // connect to keyword search form
     const formKeyword = document.getElementById('keyword');
     var searchword;
@@ -490,7 +490,7 @@ function init () {
     results = [];
 
 
-    // get value entered by user
+    // --------------- Get value entered by user ---------------
     formKeyword.addEventListener('submit', (event) => {
         searchword = document.getElementById("suchwort").value.toLowerCase();
         console.log(searchword)
@@ -568,8 +568,8 @@ function init () {
         flash(e.feature);
     });
 
-/*
-    // TIME SEARCH
+    /*
+    // TIME SEARCH ---- NOT YET IMPLEMENTED 
     // connect to keyword search form
     const formDates = document.getElementById('dates');
     // prevent page from reloading 
@@ -595,7 +595,7 @@ function init () {
                 // });
                 console.log(feature.properties.Name_deiner_Story);
         }}})
-*/
+    */
     
     // --------------- CLEAR SEARCH ------------------
     // connect to keyword search form
