@@ -1,31 +1,29 @@
 function init () {
-   
-    /* 
-    ESRI TOKEN FOR IMAGE URL
-    In the past, we have had to update the token a few times. If it changes again (= pictures don't load), go to the survey in the ArcGIS Online Contents 
-    It's called "Teile eine Teile eine neue MINKT STORY" and it's a form > Manage in Survey123 Website >  Analyze > Scroll to bottom and open one of the images >
-    get the image url. In the URL you can see the new token. Insert the token below:
-    */
-   
-    // var token = "?token=Wmh-VKC7cu7S0izWfij9hBXqRgrTejQ7f72a569ZpjOHeE0776nfNpVY5vP5qax0fZh6YqsNzfMzHxNF9tqLpv1omWIQsKilwv73rEEATjMWyCUgbwlhZoYE_M-qI0geKLLnN3G518pPMPf2BzCAKGk1i1otQkxL5A_uqxBzgYEdE9lfahgJpxq7EcIzsbZm85WQvz5rFSSY-ZN_6JQJDZ4Kg0HBIIZNhLoM3LYckjTLKbXXSqs6MhFs-MrhEyPM' ";
-   
-   
+
+    // This file contains the main functionalities of the web map. 
+    // Comments have been included in the code for easy understanding and reproducibility.
+
     /*
-    BASE LAYERS
+    
+    =================================== BASE LAYERS CONFIGURATION =====================================
+
+    These layers are used as background maps, between which the user can choose. 
+    We use Bing layers and Open Stree Map. 
     */
 
-    // Bing Styles and Key
+    // Bing Styles
     var styles = ['Road', 'Aerial','AerialWithLabels'];
+
+    // Bing Key- you must request an API key for Bing 
     var bingKey = 'Atoz1wDioRmjCFJbh0EYKVbNhY1FpWn2hyBGodCxBwsbWmxEP9Il16k9qcBBLXWk';
 
-    // Bing Layers
-    var bingLayers = [];
+    // use an array to group all base layers
+    var baseLayers = [];
     let i, ii;
     for (i =0, ii = styles.length; i < ii; ++i) {
-        bingLayers.push(
+        baseLayers.push(
             new ol.layer.Tile({
-                //title: styles[i],
-                title: styles[i].split(/(?=[A-Z])/).join(" "), //ArealWithLabels -> Areal With Labels
+                title: styles[i].split(/(?=[A-Z])/).join(" "), 
                 type: 'base',
                 visible: true,
                 preload: Infinity,
@@ -37,7 +35,7 @@ function init () {
         );
     }
 
-    //OSM layer
+    // Open Street Map layer
     var osm = new ol.layer.Tile({
         title: 'OSM',
         type: 'base',
@@ -45,15 +43,23 @@ function init () {
         source: new ol.source.OSM()
     })
 
-    // Combining base layers in array for layer switcher
-    bingLayers.push(osm);
+
+    // Add Open Street Map layer to the baseLayers array
+    baseLayers.push(osm);
+
 
     /*
-    WFS INTEGRATION
-    The images for the features are stored in the static folder on GitHub
+    
+    =================================== WEB FEATURE SERVICE LAYER CONFIGURATION =====================================
+
+    The icons for the features are stored in the "static" folder on GitHub.
+    These icons and styles are created according to the categories ("zuordnung") of the stories.
+    The categories are created in the Survey123 application.
     */
 
-    // Icon Styling
+    //  --------- FEATURE STYLING ----------
+
+    // medicinal plants
     var plantStyle = new ol.style.Style({
         image: new ol.style.Icon({
             anchor: [0.5, 0.8],
@@ -63,6 +69,7 @@ function init () {
             src: 'static/plant.png'
         })
     });
+    // negative mobility moments
     var nMobStyle = new ol.style.Style({
         image: new ol.style.Icon({
             anchor: [0.5, 0.8],
@@ -72,6 +79,7 @@ function init () {
             src: 'static/nMob.png'
         })
     });
+    // positive mobility moments
     var pMobStyle = new ol.style.Style({
         image: new ol.style.Icon({
             anchor: [0.5, 0.8],
@@ -81,6 +89,7 @@ function init () {
             src: 'static/pMob.png'
         })
     });
+    // other
     var oStyle = new ol.style.Style({
         image: new ol.style.Icon({
             anchor: [0.5, 0.8],
@@ -90,6 +99,7 @@ function init () {
             src: 'static/sonstige.png'
         })
     });
+    // living spaces
     var liveStyle = new ol.style.Style({
         image: new ol.style.Icon({
             anchor: [0.5, 0.8],
@@ -99,13 +109,20 @@ function init () {
             src: 'static/lebensort.png'
         })
     });
-    var invisible = new ol.style.Style({ // to be used for flashing symbols
+    // an invisible icon to be used for flashing symbols when the keyword search is used
+    var invisible = new ol.style.Style({ 
         stroke: new ol.style.Stroke({
         width: 0, color: [255, 0, 0, 1]
         })
-});
+    });
+   
 
-    // WFS get features request
+    // ---------- WEB FEATURE SERVICE GET REQUEST ----------
+   
+    // This request must be adapted to contain your WFS link. If you are using ESRI, the Survey123 results are automatically
+    // published in a feature layer, available to you in ArcGIS Online. There you can publish this feature layer as a WFS and
+    // use its link here.
+   
     var request = 'https://dservices.arcgis.com/Sf0q24s0oDKgX14j/arcgis/services/MinktStories/WFSServer?service=wfs&' +
     'version=2.0.0&request=getfeature&typeNames=MinktStories:survey&srsname=EPSG:3857&' +
     'outputFormat=GEOJSON';
@@ -117,7 +134,7 @@ function init () {
         return xmlHttp.responseText;
     }
 
-    // Parse as JSON
+    // Parse the WFS as JSON
     var requestJSON = JSON.parse(httpGet(request));
     console.log(requestJSON);
     
@@ -132,8 +149,9 @@ function init () {
         source: flashing,
     });
 
-
-    // Create a layer with all features but individual styling
+    // ---------- CREATE MAP LAYERS FROM JSON ----------
+   
+    // Create a single layer with all features but individual styling
     for (var y in requestJSON.features) {
         var feature = requestJSON.features[y];
         var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
@@ -155,12 +173,12 @@ function init () {
         point.setProperties(feature.properties);
     }
 
-    // Distibute features in layers based on property "Zuordnung"
+    // Distibute features in separate layers based on their cateogory ("Zuordnung")
     for (var x in requestJSON.features) {
         var feature = requestJSON.features[x];
         var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
 
-        /* single mobility layer */
+        // single mobility layer, contains both positive and negative mobility features
         if (feature.properties.Zuordnung == "Positiver_Mobilitätsmoment" || feature.properties.Zuordnung == "Negativer_Mobilitätsmoment") {
             var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
@@ -174,32 +192,9 @@ function init () {
             mobility.addFeature(point);
             point.setProperties(feature.properties);
         }
-        if (feature.properties.Zuordnung == "Positiver_Mobilitätsmoment" || feature.properties.Zuordnung == "Negativer_Mobilitätsmoment") {
-            var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
-            var point = new ol.Feature({
-            geometry: new ol.geom.Point(position)
-            });
-            if (feature.properties.Zuordnung == "Positiver_Mobilitätsmoment") {
-                point.setStyle(pMobStyle)
-            } else {
-                point.setStyle(nMobStyle)
-            }
-            mobility.addFeature(point);
-            point.setProperties(feature.properties);
-        }else if (feature.properties.Zuordnung == "Positiver_Mobilitätsmoment" || feature.properties.Zuordnung == "Negativer_Mobilitätsmoment") {
-            var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
-            var point = new ol.Feature({
-            geometry: new ol.geom.Point(position)
-            });
-            if (feature.properties.Zuordnung == "Positiver_Mobilitätsmoment") {
-                point.setStyle(pMobStyle)
-            } else {
-                point.setStyle(nMobStyle)
-            }
-            mobility.addFeature(point);
-            point.setProperties(feature.properties);
-        }
-         else if (feature.properties.Zuordnung == "Lebensort") {
+       
+        // layer for living spaces
+        else if (feature.properties.Zuordnung == "Lebensort") {
             var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
@@ -207,7 +202,10 @@ function init () {
             point.setStyle(liveStyle);
             lebensort.addFeature(point);
             point.setProperties(feature.properties);
-        } else if (feature.properties.Zuordnung == "Heilpflanze") {
+        } 
+       
+       // layer for medicinal plants
+       else if (feature.properties.Zuordnung == "Heilpflanze") {
             var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
@@ -215,7 +213,10 @@ function init () {
             point.setStyle(plantStyle);
             plants.addFeature(point);
             point.setProperties(feature.properties);
-        } else if (feature.properties.Zuordnung == "other") {
+        } 
+       
+       // layer for other
+       else if (feature.properties.Zuordnung == "other") {
             var position = ([feature.geometry.coordinates[0], feature.geometry.coordinates[1]]);
             var point = new ol.Feature({
             geometry: new ol.geom.Point(position)
@@ -257,9 +258,9 @@ function init () {
         maxResolution: 40
     });
 
-    /*
-    FEATURE CLUSTERING 
-    */ 
+    
+    // ===================================== FEATURE CLUSTERING =====================================
+  
     
     var clusterSource = new ol.source.Cluster({
         source: allFeatures
@@ -298,9 +299,9 @@ function init () {
     });
 
 
-    /*
-    GEOLOCATION
-    */
+    
+    // =================================== GEOLOCATION =====================================
+   
 
     // Use geolocation to add marker at the device's location
     //add current geolocation of user 
@@ -386,9 +387,9 @@ function init () {
         reverse: false
     });
 
-    /*
-    CREATE BASIC MAP
-    */
+   
+    // ===================================== CREATE BASIC MAP =====================================
+   
 
    // Create a variable lungauPosition. This position will be the "starting" view when the page is loaded.
    var lungauPosition = ol.proj.transform ([13.80937, 47.12704], 'EPSG:4326', 'EPSG:3857');
@@ -432,9 +433,9 @@ function init () {
     });
 
 
-    /*
-    Home Button
-    */
+  
+    / ===================================== Home Button =====================================
+   
     
     const zoomHome = document.getElementById('home');
     zoomHome.addEventListener('click', function() {
@@ -458,9 +459,9 @@ function init () {
         }
     });
 
-      /*
-    Tools Button
-    */
+    
+    // ===================================== Tools Button =====================================
+    
 
     const tools = document.getElementById("tools");
     var counter = 0;
@@ -474,11 +475,10 @@ function init () {
     });
     
 
-    /*
-    TOOLBOX 
-    */
-
-
+    
+    // ===================================== TOOLBOX FOR KEYWORD SEARCH =====================================
+  
+   
     // KEYWORD SEARCH
     // connect to keyword search form
     const formKeyword = document.getElementById('keyword');
@@ -523,8 +523,7 @@ function init () {
     // Distibute features in layers based on property "Zuordnung"
     
 
-
-    // FLASH ANIMATION
+    // ---------------- FLASH ANIMATION ----------------
     var duration = 3000;
     function flash(feature) {
     var start = new Date().getTime();
@@ -598,7 +597,7 @@ function init () {
         }}})
 */
     
-    // CLEAR SEARCH
+    // --------------- CLEAR SEARCH ------------------
     // connect to keyword search form
     const formClear = document.getElementById('clear');
     // prevent page from reloading 
@@ -614,9 +613,9 @@ function init () {
 
 
 
-    /*
-    ON-HOVER HIGHLIGHT
-    */
+   
+    // ===================================== ON-HOVER HIGHLIGHT FUNCTIONALITY =====================================
+   
 
     // Styles - same as for normal features but a larger scale
     var plantStyle1 = new ol.style.Style({
@@ -716,11 +715,12 @@ function init () {
     });
 
 
-    /*
-     POP-UPS 
-    */
+   
+    // ===================================== POP-UPS =====================================
+    
 
-    // Pop-Up for Geolocation
+    // --------------- Pop-Up for Geolocation ---------------
+   
     const overlayContainerElementmarker = document.querySelector('.ol-popupMarker');
 
     const overlayLayerMarker = new ol.Overlay({
@@ -743,7 +743,8 @@ function init () {
         })
     });
 
-    // Pop-Ups for Features
+   
+    // --------------- Pop-Ups for Features ---------------
 
     // link container to element in html
     const overlayContainerElement = document.querySelector('.ol-popup');
@@ -787,7 +788,9 @@ function init () {
         }) 
     });
 
-    // Pop Up for Gallery PopUps (No AutoPan! Otherwise map.zoom and setView gets messed up)
+   
+    // --------------- Pop Up for Gallery Images ---------------
+   
        // link container to element in html
        const overlayContainerElement1 = document.querySelector('.ol-popup');
 
@@ -827,41 +830,44 @@ function init () {
         });
 
 
-    /*
-    IMAGE GALLERY
-    */
+ 
+    // ===================================== IMAGE GALLERY =====================================
+   
 
-    // Images in Gallery - link to the elements in the index.html file
+    // --------------- Link to the image box elements in the index.html file ---------------
     const galleryimage1 = document.getElementById('gallery-image1');
     const galleryimage2 = document.getElementById('gallery-image2');
     const galleryimage3 = document.getElementById('gallery-image3');
     const galleryimage4 = document.getElementById('gallery-image4');
-
-    // Hover text in Gallery - link to the elements in the index.html file
+ 
+    // --------------- Link to the hover text elements in the index.html file ---------------
     const gallerytext1 = document.getElementById('image1-text');
     const gallerytext2 = document.getElementById('image2-text');
     const gallerytext3 = document.getElementById('image3-text');
     const gallerytext4 = document.getElementById('image4-text');
 
-    // Get ObjectID for each feature. The object ID is important for the image URL. 
+    // --------------- Get the ObjectID for each feature ---------------
+    // The object ID is important for the image URL
     var featuresID = [];
     for (var u in requestJSON.features) {
         featuresID[u] = requestJSON.features[u].properties.ObjectID;
     };
 
-    // Get Story name for hover text
+    // --------------- Get Story name for hover text ---------------
     var featuresText = [];
     for (var v in requestJSON.features) {
         featuresText[v] = requestJSON.features[v].properties.Name_deiner_Story;
     }; 
     
-    // Here we caluclate the imageIndex to determine which images are shown in the four display boxes
+    // --------------- Caluclate the imageIndex ---------------
+    // The imageIndex is used to specify which images are shown in the four display boxes
     // We have set the initial default imageIndex value to the middle of the array, so users can click on both the prev. and next buttons
     var length = requestJSON.features.length;
     // Apply Math.round to the initial index number - otherwise we might get a decimal number!
     var imageIndex = Math.round((length - (length / 2)));
 
-    // Fill Gallery with initial images using URL frame and imageIndex and token
+    // --------------- Fill Gallery with initial images ---------------
+    // This is done using the WFS URL as a frame and inserting the imageIndex at specific locations
  
     galleryimage1.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
     featuresID[imageIndex] + "/attachments/" + featuresID[imageIndex] +
@@ -879,13 +885,13 @@ function init () {
     featuresID[imageIndex + 3] + "/attachments/" + featuresID[imageIndex + 3] +
     "' width='300' >";
 
-    // Fill Gallery with text corresponding to images 
+    // --------------- Fill Gallery with text corresponding to images ---------------
     gallerytext1.innerHTML = "<p>" + featuresText[imageIndex] + "</p>";
     gallerytext2.innerHTML = "<p>" + featuresText[imageIndex + 1] + "</p>";
     gallerytext3.innerHTML = "<p>" + featuresText[imageIndex + 2] + "</p>";
     gallerytext4.innerHTML = "<p>" + featuresText[imageIndex + 3] + "</p>";
     
-    // initate next and previous controls to change image gallery 
+    // --------------- Initate next and previous controls to interact with the image gallery ---------------
     init.changeIndex = function changeIndex(n) {
         // Add "If" conditions to prevent the user from clicking out of bounds of the existing image index range
         if(imageIndex === 0 && n === -1){
@@ -897,7 +903,7 @@ function init () {
         else {
             imageIndex = imageIndex + n;
 
-            // Fill Gallery with Images
+            // --------------- Re-fill gallery with images when prev. or next button is clicked ---------------
             galleryimage1.innerHTML = "<img src='https://services.arcgis.com/Sf0q24s0oDKgX14j/arcgis/rest/services/survey123_b6e023860648421f832ce0e93ad14aec/FeatureServer/0/" +
             featuresID[imageIndex] + "/attachments/" + featuresID[imageIndex] +
             "' width='300'>";
@@ -911,7 +917,7 @@ function init () {
             featuresID[imageIndex + 3] + "/attachments/" + featuresID[imageIndex + 3] +
             "' width='300'>";
 
-            // Fill Gallery with Text
+            // --------------- Re-fill gallery with new text ---------------
             gallerytext1.innerHTML = "<p>" + featuresText[imageIndex] + "</p>";
             gallerytext2.innerHTML = "<p>" + featuresText[imageIndex + 1] + "</p>";
             gallerytext3.innerHTML = "<p>" + featuresText[imageIndex + 2] + "</p>";
@@ -922,7 +928,8 @@ function init () {
         return imageIndex;
     }
 
-    // Add Event listener on image blocks: if clicked, then zoom and center on that feature in the map
+    // --------------- Add Event listener on image blocks ---------------
+    // If an image is clicked, then zoom and center on that feature in the map and generate pop-up automatically
     
    const media1 = document.getElementById('media1');
     media1.addEventListener('click', function () {
