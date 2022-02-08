@@ -19,6 +19,7 @@ The web map is an open layers web application that integrates data collected in 
 The inital view of the web map upon opening it shows the clustered features:
 
 ![Capture5](https://user-images.githubusercontent.com/81073205/152940001-65e11f41-3453-48bf-be26-7ed5cf137f8e.PNG)
+
 <br/>
 <br/>
 
@@ -32,6 +33,10 @@ If the user clicks on any icon, a popup is generated showing the image and the s
 ![Capture7](https://user-images.githubusercontent.com/81073205/152940030-168f6fda-b0f3-47b6-b574-68191d4db34d.PNG)
 <br/>
 <br/>
+
+If the web map is loaded on a phone screen, the layout automatically adjusts. Notably the gallery disappears.
+<img align="center" src="https://user-images.githubusercontent.com/81073205/152957551-b3e630c1-4cdc-4121-9fef-1bf5dda1e12d.PNG" height="400">
+
 
 ## Recent Updates
 
