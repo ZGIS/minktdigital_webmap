@@ -14,7 +14,12 @@ The web map is an open layers web application that integrates data collected in 
 
 <br/>
 
-## The Map
+## The Concept and Spatial Data Infrastructure behind the Web Map
+
+![concept](https://user-images.githubusercontent.com/81073205/152962979-aa3da3a2-02f3-4e6c-ad19-668407fb8b52.png)
+
+
+## The Web Map
 
 The inital view of the web map upon opening it shows the clustered features:
 
