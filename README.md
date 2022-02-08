@@ -33,7 +33,7 @@ If the user clicks on any icon, a popup is generated showing the image and the s
 <br/>
 <br/>
 
-**Recent Updates:** 
+## Recent Updates
 
 <br/>
 
@@ -45,3 +45,10 @@ If the user clicks on any icon, a popup is generated showing the image and the s
 |  _30.11.2021_  | Added to the map: autoPan function for the pop-ups, on-hover highlighting of the individual features, and an on-hover opening and closing of the layer switcher menu were added.  |
 
 <br/>
+
+## Reproducibility
+
+The web map hosted here can be reproduced by you with your own data, for your own applications! 
+
+Please note that the data that flows into the web map is created in the ([ESRI](https://www.esri.com/en-us/home)) environment, specifically ArcGIS Online and Survey123. These are **commercial products**. 
+
