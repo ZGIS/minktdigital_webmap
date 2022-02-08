@@ -353,7 +353,7 @@ function init () {
     baseLayers = new ol.layer.Group({
         title: "Base Layers",
         fold:'close',
-        layers: bingLayers
+        layers: baseLayers
     });
 
     overlays = new ol.layer.Group({
